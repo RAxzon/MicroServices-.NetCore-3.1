@@ -22,7 +22,7 @@ namespace Basket.API.Controllers
         private readonly IMapper _mapper;
         private readonly EventBusRabbitMQProducer _eventBus;
 
-        public BasketController(IBasketRepository repository, ILogger logger, IMapper mapper, EventBusRabbitMQProducer eventBus)
+        public BasketController(IBasketRepository repository, ILogger<BasketController> logger, IMapper mapper, EventBusRabbitMQProducer eventBus)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger)); ;
@@ -54,7 +54,7 @@ namespace Basket.API.Controllers
             }
         }
 
-        [HttpPut]
+        [HttpPost]
         [ProducesResponseType(typeof(BasketCart), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(BasketCart), (int)HttpStatusCode.BadRequest)]
         public async Task<ActionResult<BasketCart>> UpdateBasket([FromBody] BasketCart basket)

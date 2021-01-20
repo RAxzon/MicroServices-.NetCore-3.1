@@ -4,11 +4,13 @@ using Basket.API.Data.Interfaces;
 using Basket.API.Repositories;
 using Basket.API.Repositories.Interfaces;
 using EventDrivenRabbitMQ;
+using EventDrivenRabbitMQ.Producer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using RabbitMQ.Client;
 using StackExchange.Redis;
@@ -47,6 +49,8 @@ namespace Basket.API
 
             services.AddAutoMapper(typeof(Startup));
 
+            // RabbitMQ
+
             services.AddSingleton<IRabbitMQConnection, RabbitMQConnection>(s =>
             {
                 var factory = new ConnectionFactory()
@@ -64,6 +68,11 @@ namespace Basket.API
 
                 return new RabbitMQConnection(factory);
             });
+
+            services.AddSingleton<EventBusRabbitMQProducer>();
+
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
+            services.AddSingleton(typeof(ILogger<>), typeof(Logger<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
