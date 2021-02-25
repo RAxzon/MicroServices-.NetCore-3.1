@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Ordering.Core.Interfaces;
+using Ordering.Application.Commands;
+using Ordering.Application.Queries;
+using Ordering.Application.Responses;
 
 namespace Ordering.API.Controllers
 {
@@ -9,15 +14,31 @@ namespace Ordering.API.Controllers
     [Route("api/v1/[controller]")]
     public class OrderController : Controller
     {
-        private readonly IOrderRepository _orderRepository;
-        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderRepository orderRepository, ILogger<OrderController> logger)
+        private readonly IMediator _mediator;
+
+        public OrderController(IMediator mediator)
         {
-            _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository)); ;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<OrderResponse>), (int) HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<OrderResponse>>> GetOrdersByUserName(string userName)
+        {
+            var query = new GetOrderByUserNameQuery(userName);
+            var orders = await _mediator.Send(query);
 
+            return Ok(orders);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(OrderResponse), (int) HttpStatusCode.OK)]
+        public async Task<ActionResult<OrderResponse>> CheckoutOrder([FromBody]CheckoutOrderCommand command)
+        {
+            var result = await _mediator.Send(command);
+
+            return Ok(result);
+        }
     }
 }
