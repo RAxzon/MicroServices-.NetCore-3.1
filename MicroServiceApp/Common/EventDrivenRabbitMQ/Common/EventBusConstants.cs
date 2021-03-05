@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace EventDrivenRabbitMQ.Common
+﻿namespace EventDrivenRabbitMQ.Common
 {
     public class EventBusConstants
     {

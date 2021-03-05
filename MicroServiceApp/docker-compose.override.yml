@@ -14,6 +14,14 @@ services:
         ports:
             - "6379:6379"
 
+    orderdb:
+        container_name: orderdb
+        ports:
+            - "1433:1433"
+        environment:
+            SA_PASSWORD: "MyWifiIsBroken1983"
+            ACCEPT_EULA: "Y"
+
     rabbitmq:
         container_name: rabbitmq
         restart: always
@@ -22,6 +30,7 @@ services:
             - "15672:15672"
 
     catalog.api:
+        container_name: "catalogapi"
         environment:
             - ASPNETCORE_ENVIRONMENT=Development
             - "CatalogDatabaseSettings:ConnectionString=mongodb://catalogdb:27017"
@@ -32,7 +41,9 @@ services:
             - ${HOME}/.aspnet/https:/root/.aspnet/https/
         ports:
             - "8000:80"
+
     basket.api:
+        container_name: "basketapi"
         environment:
             - ASPNETCORE_ENVIRONMENT=Development
             - "ConnectionStrings:Redis=basketdb:6379"
@@ -45,3 +56,21 @@ services:
             - ${HOME}/.aspnet/https:/root/.aspnet/https/
         ports:
             - "8001:80"
+
+    ordering.api:
+        container_name: "orderingapi"
+        # Restart on failure to connect
+        restart: on-failure
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - "ConnectionStrings:OrderConnection=Server=orderdb;DataBase=OrderDb;User Id=sa; Password=MyWifiIsBroken1983;"
+            - "EventBus:HostName=rabbitmq"
+            #- ASPNETCORE_URLS=https://+:443;http://+:80
+        depends_on:
+            - orderdb
+            - rabbitmq
+        ports:
+            - "8002:80"
+            #- "443"
+        #volumes:
+            #- ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
